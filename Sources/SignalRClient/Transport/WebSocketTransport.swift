@@ -151,20 +151,23 @@ actor WebSocketTransport: Transport {
             }
 
             func stop(error: Error?) async {
-                if closed {
-                    return
-                }
+                if closed { return }
                 closed = true
 
-                urlSession?.finishTasksAndInvalidate() // Prevent new task from being created
-                websocket?.cancel() // Close the current connection
+                urlSession?.finishTasksAndInvalidate()
+                websocket?.cancel()
 
-                if await openTcs.trySetResult(.failure(error ?? SignalRError.connectionAborted)) == true {
-                    receiveTask?.cancel() // Cancel the receive task
-                } else {
-                    await receiveTask?.value // Wait for the receive task to complete
-                    await onClose?(error) // Call the close handler
-                }
+                // Always cancel the receive loop before awaiting it.
+                receiveTask?.cancel()
+
+                // Complete open task if still pending.
+                _ = await openTcs.trySetResult(.failure(error ?? SignalRError.connectionAborted))
+
+                // Then wait for the receive task to end (if it's still running).
+                await receiveTask?.value
+
+                // Finally, notify closure.
+                await onClose?(error)
             }
 
             func onReceive(_ handler: OnReceiveHandler?) async {
