@@ -152,8 +152,10 @@ actor WebSocketTransport: Transport {
 
             func stop(error: Error?) async {
                 if closed {
+                    logger.log(level: .debug, message: "Returning because closed is true.")
                     return
                 }
+                
                 closed = true
 
                 urlSession?.finishTasksAndInvalidate() // Prevent new task from being created
@@ -161,9 +163,11 @@ actor WebSocketTransport: Transport {
 
                 if await openTcs.trySetResult(.failure(error ?? SignalRError.connectionAborted)) == true {
                     receiveTask?.cancel() // Cancel the receive task
+                    logger.log(level: .debug, message: "Cancelling receive task.")
                 } else {
                     await receiveTask?.value // Wait for the receive task to complete
                     await onClose?(error) // Call the close handler
+                    logger.log(level: .debug, message: "Called on close handler.")
                 }
             }
 
