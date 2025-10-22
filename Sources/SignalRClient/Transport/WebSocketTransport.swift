@@ -151,6 +151,8 @@ actor WebSocketTransport: Transport {
             }
 
             func stop(error: Error?) async {
+                logger.log(level: .debug, message: "Stop called")
+
                 if closed {
                     logger.log(level: .debug, message: "Returning because closed is true.")
                     return
