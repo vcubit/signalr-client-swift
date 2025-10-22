@@ -173,6 +173,7 @@ actor WebSocketTransport: Transport {
                 } else {
                     logger.log(level: .debug, message: "Awaiting receive task value.")
                     await receiveTask?.value
+                    logger.log(level: .debug, message: "Got receive task value.")
                     await onClose?(error)
                     logger.log(level: .debug, message: "Called on close handler.")
                 }
