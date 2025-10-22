@@ -157,18 +157,23 @@ actor WebSocketTransport: Transport {
                     logger.log(level: .debug, message: "Returning because closed is true.")
                     return
                 }
-                
-                closed = true
 
-                urlSession?.finishTasksAndInvalidate() // Prevent new task from being created
-                websocket?.cancel() // Close the current connection
+                closed = true
+                logger.log(level: .debug, message: "Set closed flag")
+
+                urlSession?.finishTasksAndInvalidate()
+                logger.log(level: .debug, message: "Finished tasks and invalidated session")
+
+                websocket?.cancel()
+                logger.log(level: .debug, message: "Cancelled websocket")
 
                 if await openTcs.trySetResult(.failure(error ?? SignalRError.connectionAborted)) == true {
-                    receiveTask?.cancel() // Cancel the receive task
+                    receiveTask?.cancel()
                     logger.log(level: .debug, message: "Cancelling receive task.")
                 } else {
-                    await receiveTask?.value // Wait for the receive task to complete
-                    await onClose?(error) // Call the close handler
+                    logger.log(level: .debug, message: "Awaiting receive task value.")
+                    await receiveTask?.value
+                    await onClose?(error)
                     logger.log(level: .debug, message: "Called on close handler.")
                 }
             }
