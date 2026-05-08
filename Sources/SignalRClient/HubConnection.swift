@@ -295,6 +295,9 @@ public actor HubConnection {
     }
 
     private func stopInternal() async {
+        
+        try? await Task.sleep(nanoseconds: 30 * 1_000_000_000) // test delay
+        
         let previousStatus = connectionStatus
         if (previousStatus == .Stopped) {
             logger.log(level: .debug,message:"Call to HubConnection.stop ignored because it is already in the disconnected state.")
