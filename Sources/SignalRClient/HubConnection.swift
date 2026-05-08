@@ -296,7 +296,7 @@ public actor HubConnection {
 
     private func stopInternal() async {
         
-        try? await Task.sleep(nanoseconds: 30 * 1_000_000_000) // test delay
+        try? await Task.sleep(nanoseconds: 60 * 1_000_000_000) // test delay
         
         let previousStatus = connectionStatus
         if (previousStatus == .Stopped) {
