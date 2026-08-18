@@ -159,12 +159,14 @@ actor WebSocketTransport: Transport {
                 urlSession?.finishTasksAndInvalidate() // Prevent new task from being created
                 websocket?.cancel() // Close the current connection
 
-                if await openTcs.trySetResult(.failure(error ?? SignalRError.connectionAborted)) == true {
-                    receiveTask?.cancel() // Cancel the receive task
-                } else {
-//                    await receiveTask?.value // Wait for the receive task to complete
+                if await openTcs.trySetResult(
+                    .failure(error ?? SignalRError.connectionAborted)
+                ) {
                     receiveTask?.cancel()
-                    await onClose?(error) // Call the close handler
+                } else {
+                    receiveTask?.cancel()
+                    await receiveTask?.value
+                    await onClose?(error)
                 }
             }
 
